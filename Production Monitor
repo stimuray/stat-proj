@@ -1,0 +1,49 @@
+CREATE TRIGGER [ARD].[TRG_PRODUCTIONS_MONITOR_DK]
+ON [ARD].[HATA]
+AFTER INSERT 
+AS
+BEGIN
+       SET NOCOUNT ON;
+       declare @DateRec datetime
+       declare @MachNumber int
+       declare @TimeOn int
+       declare @TimeOff int
+       declare @Pieces int
+       declare @Discards int
+       declare @Cycle float
+       declare @Shift int
+       declare @GT nchar(5)
+       (case when @GT in ('00001', '00000')
+                    and inserted.MachNumber=PRODUCTIONS_MONITOR_DK.MachNumber
+                    and CAST(inserted.daterec as date)=CAST(PRODUCTIONS_MONITOR_DK.DateRec AS date)
+                    and dbo.CalShift(@DateRec)=Shift
+       then
+       
+                    
+       end          
+                    )      
+
+
+
+                    UPDATE PRODUCTIONS_MONITOR_DK 
+
+                    SET DateRec=inserted.BeginDate
+                    SET MachNumber=Makina
+                    SET TimeOn= 
+                          SUM(TimeOn+@TimeOn) 
+                          WHERE MachNumber=@MachNumber
+                          AND CAST(@DateRec as date)=CAST(DateRec AS date)
+                          AND dbo.CalShift(@DateRec)=Shift
+                    ,
+                    @TimeOff= ,
+                    @Pieces=Urun,
+                    @Discards=1,
+                    @Cycle=1,
+                    @Shift=dbo.CalShift(BeginDate),
+                    @GT=GT
+                    from inserted
+                    INSERT INTO dbo.[PRODUCTIONS_MONITOR_DK]
+                    VALUES (@DateRec, @MachNumber, @TimeOn, @TimeOff, @Pieces, @Discards, @Cycle, @Shift, @GT)
+
+END    
+END
